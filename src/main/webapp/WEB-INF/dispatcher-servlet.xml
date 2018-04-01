@@ -30,6 +30,10 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
+    <mvc:default-servlet-handler />
+
+
+
 
 
     <!-- 文件上传 -->
