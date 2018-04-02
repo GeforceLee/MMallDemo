@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 @RequestMapping("/user/")
-@Api(value = "用户操作", description = "前端用户接口")
+@Api(value = "用户操作", description = "前端用户接口",tags = "用户")
 public class UserController {
 
 
