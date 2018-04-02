@@ -216,10 +216,10 @@ public class UserController {
     @ResponseBody
     @ApiOperation("更新用户信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(value = "邮箱", name = "email", required = true, paramType = "query"),
-            @ApiImplicitParam(value = "电话", name = "phone", required = true, paramType = "query"),
-            @ApiImplicitParam(value = "问题", name = "question", required = true, paramType = "query"),
-            @ApiImplicitParam(value = "答案", name = "answer", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "邮箱", name = "email",  paramType = "query"),
+            @ApiImplicitParam(value = "电话", name = "phone",  paramType = "query"),
+            @ApiImplicitParam(value = "问题", name = "question",  paramType = "query"),
+            @ApiImplicitParam(value = "答案", name = "answer",  paramType = "query"),
     })
     public ServerResponse<User> updateInformation(@ApiIgnore HttpSession session,@ApiIgnore User user) {
         User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
