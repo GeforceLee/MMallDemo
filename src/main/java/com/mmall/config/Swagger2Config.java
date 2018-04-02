@@ -5,6 +5,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import springfox.documentation.annotations.ApiIgnore;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -22,25 +23,26 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
+@EnableWebMvc
 public class Swagger2Config {
     @Bean
     public Docket buildDocket(){
         return new Docket(DocumentationType.SWAGGER_2)
+                .ignoredParameterTypes(ApiIgnore.class)
                 .apiInfo(buildApiInf())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.mmall.controller"))
                 .paths(PathSelectors.any())
+
                 .build();
     }
 
     private ApiInfo buildApiInf(){
         return new ApiInfoBuilder()
-                .title("xingguo大标题")
-                .termsOfServiceUrl("http://blog.csdn.net/u014231523网址链接")
-                .description("springmvc swagger2")
-                .contact(new Contact("diaoxingguo", "http://blog.csdn.net/u014231523", "diaoxingguo@163.com"))
+                .title("MMall接口")
+                .description("接口文档")
+                .contact(new Contact("GeforceLee", "www.eget.me", "314004856@qq.com"))
                 .build();
-
     }
 
 }

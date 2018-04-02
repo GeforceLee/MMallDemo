@@ -5,15 +5,16 @@ import com.mmall.common.ResponseCode;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpSession;
 
@@ -25,7 +26,7 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 @RequestMapping("/user/")
-@Api("用户操作")
+@Api(value = "用户操作", description = "前端用户接口")
 public class UserController {
 
 
@@ -33,91 +34,194 @@ public class UserController {
     private IUserService iUserService;
 
     /**
-     *  用户登录
+     * 用户登录
+     *
      * @param username
      * @param password
      * @param session
      * @return
      */
     @ApiOperation("用户登录")
-    @RequestMapping(value = "login.do",method = RequestMethod.POST)
+    @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<User> login(@ApiParam(name="username",value="用户名",required = true) String username, @ApiParam(name="password",value="密码",required = true)String password, HttpSession session){
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", value = "用户名", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "query"),
+    })
+    public ServerResponse<User> login(String username, String password, @ApiIgnore HttpSession session) {
 
-        ServerResponse<User> response = iUserService.login(username,password);
+        ServerResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {
-            session.setAttribute(Const.CURRENT_USER,response.getData());
+            session.setAttribute(Const.CURRENT_USER, response.getData());
         }
         return response;
     }
 
     /**
      * 登出
+     *
      * @param session
      * @return
      */
-    @RequestMapping(value = "logout.do",method = RequestMethod.GET)
+    @RequestMapping(value = "logout.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServerResponse<String> logout(HttpSession session){
+    @ApiOperation("登出")
+    public ServerResponse<String> logout(@ApiIgnore HttpSession session) {
         session.removeAttribute(Const.CURRENT_USER);
         return ServerResponse.createBySuccess();
     }
 
-    @RequestMapping(value = "register.do",method = RequestMethod.POST)
+    /**
+     * 用户注册
+     *
+     * @param user
+     * @return
+     */
+    @RequestMapping(value = "register.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<String> register(User user) {
+    @ApiOperation("注册")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", value = "用户名", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "密码", name = "password", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "邮箱", name = "email", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "电话", name = "phone", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "问题", name = "question", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "答案", name = "answer", required = true, paramType = "query"),
+    })
+    public ServerResponse<String> register(@ApiIgnore User user) {
         return iUserService.register(user);
     }
 
-
-    @RequestMapping(value = "check_calid.do",method = RequestMethod.GET)
+    /**
+     * 检查可用
+     *
+     * @param str
+     * @param type 类型
+     * @return
+     */
+    @RequestMapping(value = "check_calid.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServerResponse<String> checkValid(String str,String type){
-        return iUserService.checkValid(str,type);
+    @ApiOperation("检测邮箱或用户名是否可用")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "邮箱或用户名", name = "str", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "类型", name = "type", required = true, allowableValues = "email,username", paramType = "query")
+    })
+    public ServerResponse<String> checkValid(String str, String type) {
+        return iUserService.checkValid(str, type);
     }
 
-    @RequestMapping(value = "get_user_info.do",method = RequestMethod.GET)
+    /**
+     * 获取用户信息
+     *
+     * @param session
+     * @return
+     */
+    @RequestMapping(value = "get_user_info.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServerResponse<User> getUserInfo(HttpSession session){
+    @ApiOperation("获取用户信息")
+    public ServerResponse<User> getUserInfo(@ApiIgnore HttpSession session) {
         User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user != null){
+        if (user != null) {
             return ServerResponse.createBySuccess(user);
         }
         return ServerResponse.createByErrorMessage("用户未登录，无法获取用户信息");
     }
 
-    @RequestMapping(value = "forget_get_question.do",method = RequestMethod.GET)
+    /**
+     * 获取忘记密码问题
+     *
+     * @param username
+     * @return
+     */
+    @RequestMapping(value = "forget_get_question.do", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation("获取忘记密码问题")
+    @ApiImplicitParam(value = "用户名", name = "username", required = true, paramType = "query")
     public ServerResponse<String> forgetGetQuestion(String username) {
         return iUserService.selectQuestion(username);
     }
 
-    @RequestMapping(value = "forget_check_answer.do",method = RequestMethod.GET)
+
+    /**
+     * 验证忘记密码答案
+     *
+     * @param username
+     * @param question
+     * @param answer
+     * @return
+     */
+    @RequestMapping(value = "forget_check_answer.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServerResponse<String> forgetCheckAnswer(String username,String question,String answer) {
-        return iUserService.checkAnswer(username,question,answer);
+    @ApiOperation("验证忘记密码答案")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(value = "用户名", name = "username", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "问题", name = "question", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "答案", name = "answer", required = true, paramType = "query")}
+    )
+    public ServerResponse<String> forgetCheckAnswer(String username, String question, String answer) {
+        return iUserService.checkAnswer(username, question, answer);
+    }
+
+    /**
+     * 修改忘记密码
+     * @param username
+     * @param passwordNew
+     * @param forgetToken
+     * @return
+     */
+    @RequestMapping(value = "forget_reset_password.do", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation("修改忘记密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "用户名",name = "username",required = true,paramType = "query"),
+            @ApiImplicitParam(value = "新密码",name = "password",required = true,paramType = "query"),
+            @ApiImplicitParam(value = "token",name = "token",required = true,paramType = "query"),
+    })
+    public ServerResponse<String> forgetRestPassword(String username, @RequestParam("password") String passwordNew, @RequestParam("token") String forgetToken) {
+        return iUserService.forgetRestPassword(username, passwordNew, forgetToken);
     }
 
 
-    @RequestMapping(value = "forget_reset_password.do",method = RequestMethod.GET)
+    /**
+     *  重置密码
+     * @param session
+     * @param passwordOld
+     * @param passwordNew
+     * @return
+     */
+    @RequestMapping(value = "reset_password.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServerResponse<String> forgetRestPassword(String username,String passwordNew,String forgetToken) {
-        return iUserService.forgetRestPassword(username,passwordNew,forgetToken);
-    }
+    @ApiOperation("重置密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "旧密码",name = "old",required = true,paramType = "query"),
+            @ApiImplicitParam(value = "旧密码",name = "new",required = true,paramType = "query")
 
-    @RequestMapping(value = "reset_password.do",method = RequestMethod.GET)
-    @ResponseBody
-    public ServerResponse<String> resetPassword(HttpSession session,String passwordOld,String passwordNew) {
+    })
+    public ServerResponse<String> resetPassword(@ApiIgnore HttpSession session,@RequestParam("old") String passwordOld,@RequestParam("new") String passwordNew) {
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户没登录");
         }
-        return iUserService.resetPassword(passwordOld,passwordNew,user);
+        return iUserService.resetPassword(passwordOld, passwordNew, user);
     }
 
-    @RequestMapping(value = "update_infomation.do",method = RequestMethod.GET)
+
+    /**
+     * 更新用户信息
+     * @param session
+     * @param user
+     * @return
+     */
+    @RequestMapping(value = "update_infomation.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServerResponse<User> updateInformation(HttpSession session,User user) {
+    @ApiOperation("更新用户信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "邮箱", name = "email", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "电话", name = "phone", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "问题", name = "question", required = true, paramType = "query"),
+            @ApiImplicitParam(value = "答案", name = "answer", required = true, paramType = "query"),
+    })
+    public ServerResponse<User> updateInformation(@ApiIgnore HttpSession session,@ApiIgnore User user) {
         User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
         if (currentUser == null) {
             return ServerResponse.createByErrorMessage("用户没登录");
@@ -128,18 +232,24 @@ public class UserController {
         ServerResponse<User> response = iUserService.updateInformation(user);
         if (response.isSuccess()) {
             response.getData().setUsername(currentUser.getUsername());
-            session.setAttribute(Const.CURRENT_USER,response.getData());
+            session.setAttribute(Const.CURRENT_USER, response.getData());
         }
 
         return response;
     }
 
-    @RequestMapping(value = "get_infomation.do",method = RequestMethod.GET)
+    /**
+     * 获取用户信息
+     * @param session
+     * @return
+     */
+    @RequestMapping(value = "get_infomation.do", method = RequestMethod.GET)
     @ResponseBody
-    public ServerResponse<User> getInfomation(HttpSession session) {
+    @ApiOperation("获取用户信息")
+    public ServerResponse<User> getInfomation(@ApiIgnore HttpSession session) {
         User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
         if (currentUser == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),"未登录，需要登录");
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "未登录，需要登录");
         }
         return iUserService.getInformation(currentUser.getId());
     }
