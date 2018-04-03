@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -204,7 +205,7 @@ public class ProductManageController {
     @ResponseBody
     @ApiOperation("图片上传")
     @ApiImplicitParams({
-            @ApiImplicitParam(value = "图片",name = "upload_file",paramType = "form",dataType = "java.io.File")
+            @ApiImplicitParam(value = "图片",name = "upload_file",paramType = "form",dataType = "file")
     })
     public ServerResponse upload(@ApiIgnore HttpSession session,
                                  @RequestParam("upload_file") MultipartFile file,
@@ -237,7 +238,7 @@ public class ProductManageController {
     @ResponseBody
     @ApiOperation("富文本上传图片")
     @ApiImplicitParams({
-            @ApiImplicitParam(value = "图片",name = "upload_file",paramType = "form",dataType = "java.io.File")
+            @ApiImplicitParam(value = "图片",name = "upload_file",paramType = "form",dataType = "file")
     })
     public Map richTextImgUpload(@ApiIgnore HttpSession session,
                                  @RequestParam("upload_file") MultipartFile file,
