@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/manage/user")
 @Api(tags = "管理用户",description = "后端管理接口")
-public class UserManagerController {
+public class UserManageController {
 
     @Autowired
     private IUserService iUserService;
