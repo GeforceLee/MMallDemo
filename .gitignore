@@ -24,5 +24,8 @@ hs_err_pid*
 .idea
 
 target
+
 src/main/resources/datasource.properties
+
 src/main/resources/mmall.properties
+
