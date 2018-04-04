@@ -1,5 +1,6 @@
 package com.mmall.service.impl;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mmall.common.Const;
 import com.mmall.common.ResponseCode;
@@ -44,6 +45,10 @@ public class CartServiceImpl implements ICartService {
             Cart cartItem = new Cart();
             cartItem.setQuantity(count);
             cartItem.setChecked(Const.Cart.CHECKED);
+            Product product = productMapper.selectByPrimaryKey(productId);
+            if (product == null) {
+                return ServerResponse.createByErrorMessage("没有对应的商品");
+            }
             cartItem.setProductId(productId);
             cartItem.setUserId(userId);
             cartMapper.insert(cartItem);
@@ -52,11 +57,57 @@ public class CartServiceImpl implements ICartService {
             cartMapper.updateByPrimaryKeySelective(cart);
         }
 
-        CartVo cartVo = getCartVoLimit(userId);
+        return list(userId);
+    }
 
+
+    @Override
+    public ServerResponse<CartVo> update(Integer userId, Integer productId, Integer count) {
+        if (productId == null || count == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        Cart cart = cartMapper.selectCartByUserIdAndProductId(userId, productId);
+        if (cart != null) {
+            cart.setQuantity(count);
+        }else {
+            return ServerResponse.createByErrorMessage("没有对应的商品");
+        }
+        cartMapper.updateByPrimaryKeySelective(cart);
+        return list(userId);
+    }
+
+    @Override
+    public ServerResponse<CartVo> delete(Integer userId, String productIds) {
+        List<String> prouctList = Splitter.on(",").splitToList(productIds);
+
+        if (CollectionUtils.isEmpty(prouctList)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        cartMapper.deleteByUserIdAndProductIds(userId,prouctList);
+        return list(userId);
+    }
+
+
+    @Override
+    public ServerResponse<CartVo> list(Integer userId) {
+        CartVo cartVo = this.getCartVoLimit(userId);
         return ServerResponse.createBySuccess(cartVo);
     }
 
+    @Override
+    public ServerResponse<CartVo> selectOrUnselect(Integer userId,Integer productId,Integer checked) {
+        cartMapper.checkedOrUncheckedProduct(userId,checked,productId);
+        return list(userId);
+    }
+
+
+    @Override
+    public ServerResponse<Integer> getCartProductCount(Integer userId) {
+        if (userId == null) {
+            return ServerResponse.createBySuccess(0);
+        }
+        return ServerResponse.createBySuccess(cartMapper.selectCartProductCount(userId));
+    }
 
     private CartVo getCartVoLimit(Integer userId) {
         CartVo cartVo = new CartVo();
@@ -124,4 +175,6 @@ public class CartServiceImpl implements ICartService {
         }
         return cartMapper.selectCartProudctCheckedStatusByUserId(userId) == 0;
     }
+
+
 }
