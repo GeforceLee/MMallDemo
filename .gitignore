@@ -32,3 +32,4 @@ src/main/resources/mmall.properties
 #mac
 
 .DS_Store
+mmall.iml
