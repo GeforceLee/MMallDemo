@@ -28,6 +28,7 @@ src/main/resources/datasource.properties
 
 src/main/resources/mmall.properties
 
+.iml
 #mac
 
 .DS_Store
