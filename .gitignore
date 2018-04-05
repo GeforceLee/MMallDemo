@@ -11,7 +11,6 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.ear
 *.zip
@@ -29,3 +28,6 @@ src/main/resources/datasource.properties
 
 src/main/resources/mmall.properties
 
+#mac
+
+.DS_Store
