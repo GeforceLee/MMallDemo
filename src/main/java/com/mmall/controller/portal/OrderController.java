@@ -11,6 +11,7 @@ import com.mmall.pojo.User;
 import com.mmall.service.IOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -70,18 +72,52 @@ public class OrderController {
     }
 
 
-//    @RequestMapping(value = "get_order_cart_product.do",method = RequestMethod.POST)
-//    @ResponseBody
-//    @ApiOperation("获取订单中购物车的商品")
-//    @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
-//    public ServerResponse getOrderCartProduct(@ApiIgnore HttpSession session) {
-//        User user = (User) session.getAttribute(Const.CURRENT_USER);
-//        if (user == null) {
-//            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-//        }
-//
-//        return iOrderService.canecel(user.getId(),orderNo);
-//    }
+    @RequestMapping(value = "get_order_cart_product.do",method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation("获取订单中购物车的商品")
+    public ServerResponse getOrderCartProduct(@ApiIgnore HttpSession session) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+
+        return iOrderService.getOrderCartProduct(user.getId());
+    }
+
+
+    @RequestMapping(value = "detail.do",method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation("订单详情")
+    @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
+    public ServerResponse detail(@ApiIgnore HttpSession session,Long orderNo) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+
+        return iOrderService.getOrderDetail(user.getId(),orderNo);
+    }
+
+
+    @RequestMapping(value = "list.do",method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation("订单列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "页码",name = "pageNum",paramType = "query"),
+            @ApiImplicitParam(value = "每页大小",name = "pageSize",paramType = "query"),
+    })
+    public ServerResponse list(@ApiIgnore HttpSession session,
+                               @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
+                               @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+
+        return iOrderService.getOrderList(user.getId(),pageNum,pageSize);
+    }
+
+
 
 
     @RequestMapping(value = "pay.do",method = RequestMethod.POST)
