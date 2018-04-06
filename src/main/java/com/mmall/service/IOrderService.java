@@ -1,6 +1,7 @@
 package com.mmall.service;
 
 import com.mmall.common.ServerResponse;
+import com.mmall.vo.OrderVo;
 
 import java.util.Map;
 
@@ -14,4 +15,8 @@ public interface IOrderService {
     ServerResponse aliCallBack(Map<String ,String > params);
 
     ServerResponse<Boolean> queryOrderPayStatus(Integer userId,Long orderNo);
+
+    ServerResponse<OrderVo> cratetOrder(Integer userId, Integer shippingId);
+
+    ServerResponse<String> canecel(Integer userId,Long orderNo);
 }

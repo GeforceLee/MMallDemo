@@ -41,6 +41,49 @@ public class OrderController {
     private IOrderService iOrderService;
 
 
+
+    @RequestMapping(value = "caeate.do",method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation("创建订单")
+    @ApiImplicitParam(value = "收货地址id",name = "shippingId",paramType = "query")
+    public ServerResponse caeate(@ApiIgnore HttpSession session, Integer shippingId) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+
+        return iOrderService.cratetOrder(user.getId(),shippingId);
+    }
+
+
+    @RequestMapping(value = "cancel.do",method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation("取消订单")
+    @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
+    public ServerResponse cancel(@ApiIgnore HttpSession session, Long orderNo) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+
+        return iOrderService.canecel(user.getId(),orderNo);
+    }
+
+
+//    @RequestMapping(value = "get_order_cart_product.do",method = RequestMethod.POST)
+//    @ResponseBody
+//    @ApiOperation("获取订单中购物车的商品")
+//    @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
+//    public ServerResponse getOrderCartProduct(@ApiIgnore HttpSession session) {
+//        User user = (User) session.getAttribute(Const.CURRENT_USER);
+//        if (user == null) {
+//            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+//        }
+//
+//        return iOrderService.canecel(user.getId(),orderNo);
+//    }
+
+
     @RequestMapping(value = "pay.do",method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation("查询支付宝状态")
