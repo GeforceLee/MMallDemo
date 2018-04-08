@@ -64,7 +64,7 @@ public class OrderManageController {
     }
 
 
-    @RequestMapping(value = "list.do",method = RequestMethod.GET)
+    @RequestMapping(value = "detail.do",method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation("订单列表")
     @ApiImplicitParams({
