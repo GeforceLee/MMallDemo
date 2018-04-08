@@ -24,9 +24,9 @@ hs_err_pid*
 
 target
 
-src/main/resources/datasource.properties
+datasource.properties
 
-src/main/resources/mmall.properties
+mmall.properties
 
 .iml
 #mac
