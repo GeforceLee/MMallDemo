@@ -5,6 +5,8 @@ import com.mmall.common.ResponseCode;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
+import com.mmall.util.JsonUtil;
+import com.mmall.util.RedisPoolUtil;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.servlet.http.HttpSession;
 
@@ -52,7 +55,8 @@ public class UserController {
 
         ServerResponse<User> response = iUserService.login(username, password);
         if (response.isSuccess()) {
-            session.setAttribute(Const.CURRENT_USER, response.getData());
+//            session.setAttribute(Const.CURRENT_USER, response.getData());
+            RedisPoolUtil.setEx(session.getId(),JsonUtil.obj2String(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
         }
         return response;
     }
