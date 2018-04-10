@@ -7,10 +7,14 @@ import com.mmall.common.ServerResponse;
 import com.mmall.pojo.Shipping;
 import com.mmall.pojo.User;
 import com.mmall.service.IShippingService;
+import com.mmall.util.CookieUtil;
+import com.mmall.util.JsonUtil;
+import com.mmall.util.RedisPoolUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -45,12 +50,20 @@ public class ShippingController {
             @ApiImplicitParam(value = "地址" ,name = "receiverAddress",paramType = "query"),
             @ApiImplicitParam(value = "邮编" ,name = "receiverZip",paramType = "query"),
     })
-    public ServerResponse add(@ApiIgnore HttpSession session,@ApiIgnore Shipping shipping) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse add(@ApiIgnore HttpServletRequest request, @ApiIgnore Shipping shipping) {
+
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
-        return iShippingService.add(user.getId(),shipping);
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User currentUser = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (currentUser == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+
+
+        return iShippingService.add(currentUser.getId(),shipping);
     }
 
     @RequestMapping(value = "del.do",method = RequestMethod.DELETE)
@@ -59,9 +72,14 @@ public class ShippingController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "地址id" ,name = "shippingId",paramType = "query"),
     })
-    public ServerResponse del(@ApiIgnore HttpSession session, Integer shippingId) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse del(@ApiIgnore HttpServletRequest request, Integer shippingId) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         return iShippingService.del(user.getId(),shippingId);
@@ -81,9 +99,14 @@ public class ShippingController {
             @ApiImplicitParam(value = "地址" ,name = "receiverAddress",paramType = "query"),
             @ApiImplicitParam(value = "邮编" ,name = "receiverZip",paramType = "query"),
     })
-    public ServerResponse update(@ApiIgnore HttpSession session,@ApiIgnore Shipping shipping) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse update(@ApiIgnore HttpServletRequest request,@ApiIgnore Shipping shipping) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         return iShippingService.update(user.getId(),shipping);
@@ -95,9 +118,14 @@ public class ShippingController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "地址id" ,name = "shippingId",paramType = "query"),
     })
-    public ServerResponse select(@ApiIgnore HttpSession session, Integer shippingId) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse select(@ApiIgnore HttpServletRequest request, Integer shippingId) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         return iShippingService.select(user.getId(),shippingId);
@@ -111,11 +139,16 @@ public class ShippingController {
             @ApiImplicitParam(value = "每页限制" ,name = "pageSize",paramType = "query"),
     })
 
-    public ServerResponse<PageInfo> list(@ApiIgnore HttpSession session,
+    public ServerResponse<PageInfo> list(@ApiIgnore HttpServletRequest request,
                                          @RequestParam(value = "pageNum",defaultValue = "1") Integer pageNum,
                                          @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         return iShippingService.list(user.getId(),pageNum,pageSize);

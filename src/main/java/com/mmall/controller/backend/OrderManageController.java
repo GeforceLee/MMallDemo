@@ -7,11 +7,15 @@ import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
 import com.mmall.service.IOrderService;
 import com.mmall.service.IUserService;
+import com.mmall.util.CookieUtil;
+import com.mmall.util.JsonUtil;
+import com.mmall.util.RedisPoolUtil;
 import com.mmall.vo.OrderVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -49,12 +54,17 @@ public class OrderManageController {
             @ApiImplicitParam(value = "页码",name = "pageNum",paramType = "query"),
             @ApiImplicitParam(value = "每页大小",name = "pageSize",paramType = "query"),
     })
-    public ServerResponse<PageInfo> orderList(@ApiIgnore HttpSession session,
+    public ServerResponse<PageInfo> orderList(@ApiIgnore HttpServletRequest request,
                                               @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                               @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iOrderService.manageList(pageNum,pageSize);
@@ -70,11 +80,16 @@ public class OrderManageController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
     })
-    public ServerResponse<OrderVo> orderDetail(@ApiIgnore HttpSession session,
+    public ServerResponse<OrderVo> orderDetail(@ApiIgnore HttpServletRequest request,
                                                @RequestParam(value = "orderNo",defaultValue = "1") Long orderNo){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iOrderService.manageDetail(orderNo);
@@ -93,13 +108,18 @@ public class OrderManageController {
             @ApiImplicitParam(value = "页码",name = "pageNum",paramType = "query"),
             @ApiImplicitParam(value = "每页大小",name = "pageSize",paramType = "query"),
     })
-    public ServerResponse<PageInfo> orderSearch(@ApiIgnore HttpSession session,
+    public ServerResponse<PageInfo> orderSearch(@ApiIgnore HttpServletRequest request,
                                                @RequestParam(value = "orderNo",defaultValue = "1") Long orderNo,
                                                @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                                @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iOrderService.manageSearch(orderNo,pageNum,pageSize);
@@ -116,11 +136,16 @@ public class OrderManageController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
     })
-    public ServerResponse<String> orserSendGoods(@ApiIgnore HttpSession session,
+    public ServerResponse<String> orserSendGoods(@ApiIgnore HttpServletRequest request,
                                                Long orderNo){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iOrderService.manageSendGood(orderNo);

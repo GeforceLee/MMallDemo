@@ -6,10 +6,14 @@ import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
 import com.mmall.service.ICategoryService;
 import com.mmall.service.IUserService;
+import com.mmall.util.CookieUtil;
+import com.mmall.util.JsonUtil;
+import com.mmall.util.RedisPoolUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -37,7 +42,7 @@ public class CategoryManageController {
 
     /**
      * 增加类别
-     * @param session
+     * @param request
      * @param categoryName
      * @param parentId
      * @return
@@ -49,12 +54,16 @@ public class CategoryManageController {
             @ApiImplicitParam(value = "类别名称",name = "categoryName",required = true,paramType = "query"),
             @ApiImplicitParam(value = "父类别id",name = "parentId",required = true,paramType = "query",defaultValue = "0")
     })
-    public ServerResponse addCategory(@ApiIgnore HttpSession session, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),"没有登录");
+    public ServerResponse addCategory(@ApiIgnore HttpServletRequest request, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
-
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iCategoryService.addCategory(categoryName,parentId);
         }else {
@@ -65,7 +74,7 @@ public class CategoryManageController {
 
     /**
      * 更新类别名称
-     * @param session
+     * @param request
      * @param categoryId
      * @param categoryName
      * @return
@@ -77,10 +86,15 @@ public class CategoryManageController {
             @ApiImplicitParam(value = "类别id",name = "categoryId",required = true, paramType = "query"),
             @ApiImplicitParam(value = "类别名称",name = "categoryName",required = true, paramType = "query")
     })
-    public ServerResponse setCategoryName(@ApiIgnore HttpSession session,Integer categoryId,String categoryName) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),"没有登录");
+    public ServerResponse setCategoryName(@ApiIgnore HttpServletRequest request,Integer categoryId,String categoryName) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iCategoryService.updateCategoryName(categoryId,categoryName);
@@ -92,7 +106,7 @@ public class CategoryManageController {
 
     /**
      * 获取平行子类别
-     * @param session
+     * @param request
      * @param categoryId
      * @return
      */
@@ -100,10 +114,15 @@ public class CategoryManageController {
     @ResponseBody
     @ApiOperation("获取平行子类别")
     @ApiImplicitParam(value = "类别id",name = "categoryId",defaultValue = "0",paramType = "query")
-    public ServerResponse getChildernParallelCategory(@ApiIgnore HttpSession session,@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),"没有登录");
+    public ServerResponse getChildernParallelCategory(@ApiIgnore HttpServletRequest request,@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
         if (iUserService.checkAdminRole(user).isSuccess()) {
@@ -116,7 +135,7 @@ public class CategoryManageController {
 
     /**
      * 递归获取所有子节点
-     * @param session
+     * @param request
      * @param categoryId
      * @return
      */
@@ -124,10 +143,15 @@ public class CategoryManageController {
     @ResponseBody
     @ApiOperation("递归获取所有子节点")
     @ApiImplicitParam(value = "类别id",name = "categoryId",defaultValue = "0",paramType = "query")
-    public ServerResponse getCategoryAndDeepChildrenCategory(@ApiIgnore HttpSession session,@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),"没有登录");
+    public ServerResponse getCategoryAndDeepChildrenCategory(@ApiIgnore HttpServletRequest request,@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
         if (iUserService.checkAdminRole(user).isSuccess()) {

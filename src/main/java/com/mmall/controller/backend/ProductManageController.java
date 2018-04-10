@@ -9,7 +9,10 @@ import com.mmall.pojo.User;
 import com.mmall.service.IFileService;
 import com.mmall.service.IProductService;
 import com.mmall.service.IUserService;
+import com.mmall.util.CookieUtil;
+import com.mmall.util.JsonUtil;
 import com.mmall.util.PropertiesUtil;
+import com.mmall.util.RedisPoolUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -50,7 +53,7 @@ public class ProductManageController {
 
     /**
      * 产品新增或更新
-     * @param session
+     * @param request
      * @param product
      * @return
      */
@@ -69,10 +72,15 @@ public class ProductManageController {
             @ApiImplicitParam(value = "库存",name="stock",paramType = "query"),
             @ApiImplicitParam(value = "状态",name="status",paramType = "query")
     })
-    public ServerResponse productSave(@ApiIgnore HttpSession session,@ApiIgnore Product product) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+    public ServerResponse productSave(@ApiIgnore HttpServletRequest request,@ApiIgnore Product product) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iProductService.saveOrUpdateUpdate(product);
@@ -83,7 +91,7 @@ public class ProductManageController {
 
     /**
      * 设置产品状态
-     * @param session
+     * @param request
      * @param productId
      * @param status
      * @return
@@ -95,10 +103,15 @@ public class ProductManageController {
         @ApiImplicitParam(value = "产品id",name = "productId",paramType = "query"),
         @ApiImplicitParam(value = "状态",name = "status",paramType = "query")
     })
-    public ServerResponse setSaleStatus(@ApiIgnore HttpSession session, Integer productId,Integer status) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+    public ServerResponse setSaleStatus(@ApiIgnore HttpServletRequest request, Integer productId,Integer status) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iProductService.setSaleStatus(productId,status);
@@ -119,10 +132,15 @@ public class ProductManageController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "产品id",name = "productId",paramType = "query")
     })
-    public ServerResponse getDetail(@ApiIgnore HttpSession session, Integer productId) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+    public ServerResponse getDetail(@ApiIgnore HttpServletRequest request, Integer productId) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iProductService.manageProductDetail(productId);
@@ -133,7 +151,7 @@ public class ProductManageController {
 
     /**
      * 产品列表
-     * @param session
+     * @param request
      * @param pageNum
      * @param pageSize
      * @return
@@ -145,12 +163,17 @@ public class ProductManageController {
             @ApiImplicitParam(value = "页码",name = "pageNum",paramType = "query"),
             @ApiImplicitParam(value = "每页数量",name = "pageSize",paramType = "query"),
     })
-    public ServerResponse getList(@ApiIgnore HttpSession session,
+    public ServerResponse getList(@ApiIgnore HttpServletRequest request,
                                   @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                   @RequestParam(value = "pageSize",defaultValue = "10") int pageSize) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iProductService.getProductList(pageNum,pageSize);
@@ -162,7 +185,7 @@ public class ProductManageController {
 
     /**
      * 产品搜索
-     * @param session
+     * @param request
      * @param productName
      * @param productId
      * @param pageNum
@@ -178,14 +201,19 @@ public class ProductManageController {
             @ApiImplicitParam(value = "页码",name = "pageNum",paramType = "query"),
             @ApiImplicitParam(value = "每页数量",name = "pageSize",paramType = "query"),
     })
-    public ServerResponse productSearch(@ApiIgnore HttpSession session,
+    public ServerResponse productSearch(@ApiIgnore HttpServletRequest request,
                                   String productName,
                                   Integer productId,
                                   @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                   @RequestParam(value = "pageSize",defaultValue = "10") int pageSize) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             return iProductService.searchProcut(productName,productId,pageNum,pageSize);
@@ -196,7 +224,6 @@ public class ProductManageController {
 
     /**
      * 图片上传
-     * @param session
      * @param file
      * @param request
      * @return
@@ -207,13 +234,18 @@ public class ProductManageController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "图片",name = "upload_file",paramType = "form",dataType = "file")
     })
-    public ServerResponse upload(@ApiIgnore HttpSession session,
+    public ServerResponse upload(
                                  @RequestParam("upload_file") MultipartFile file,
                                  @ApiIgnore HttpServletRequest request) {
 
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(), "用户未登录");
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
             String path = request.getSession().getServletContext().getRealPath("upload");
@@ -240,17 +272,23 @@ public class ProductManageController {
     @ApiImplicitParams({
             @ApiImplicitParam(value = "图片",name = "upload_file",paramType = "form",dataType = "file")
     })
-    public Map richTextImgUpload(@ApiIgnore HttpSession session,
+    public Map richTextImgUpload(
                                  @RequestParam("upload_file") MultipartFile file,
                                  @ApiIgnore HttpServletRequest request,
                                  @ApiIgnore HttpServletResponse response) {
         Map resultMap = Maps.newHashMap();
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
             resultMap.put("success",false);
             resultMap.put("msg","请登录管理员");
-            return resultMap;
-        }
+            return resultMap;        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
+            resultMap.put("success",false);
+            resultMap.put("msg","请登录管理员");
+            return resultMap;        }
+
         //富文本对于返回值有自己的要求,用是是simditor
         if (iUserService.checkAdminRole(user).isSuccess()) {
             String path = request.getSession().getServletContext().getRealPath("upload");

@@ -9,11 +9,15 @@ import com.mmall.common.ResponseCode;
 import com.mmall.common.ServerResponse;
 import com.mmall.pojo.User;
 import com.mmall.service.IOrderService;
+import com.mmall.util.CookieUtil;
+import com.mmall.util.JsonUtil;
+import com.mmall.util.RedisPoolUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +53,14 @@ public class OrderController {
     @ResponseBody
     @ApiOperation("创建订单")
     @ApiImplicitParam(value = "收货地址id",name = "shippingId",paramType = "query")
-    public ServerResponse caeate(@ApiIgnore HttpSession session, Integer shippingId) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse caeate(@ApiIgnore HttpServletRequest request, Integer shippingId) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
@@ -63,9 +72,14 @@ public class OrderController {
     @ResponseBody
     @ApiOperation("取消订单")
     @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
-    public ServerResponse cancel(@ApiIgnore HttpSession session, Long orderNo) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse cancel(@ApiIgnore HttpServletRequest request, Long orderNo) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
@@ -76,9 +90,14 @@ public class OrderController {
     @RequestMapping(value = "get_order_cart_product.do",method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation("获取订单中购物车的商品")
-    public ServerResponse getOrderCartProduct(@ApiIgnore HttpSession session) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse getOrderCartProduct(@ApiIgnore HttpServletRequest request) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
@@ -90,9 +109,14 @@ public class OrderController {
     @ResponseBody
     @ApiOperation("订单详情")
     @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
-    public ServerResponse detail(@ApiIgnore HttpSession session,Long orderNo) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse detail(@ApiIgnore HttpServletRequest request,Long orderNo) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
@@ -107,11 +131,16 @@ public class OrderController {
             @ApiImplicitParam(value = "页码",name = "pageNum",paramType = "query"),
             @ApiImplicitParam(value = "每页大小",name = "pageSize",paramType = "query"),
     })
-    public ServerResponse list(@ApiIgnore HttpSession session,
+    public ServerResponse list(@ApiIgnore HttpServletRequest request,
                                @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
@@ -125,9 +154,14 @@ public class OrderController {
     @ResponseBody
     @ApiOperation("查询支付宝状态")
     @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
-    public ServerResponse apy(@ApiIgnore HttpSession session, Long orderNo,@ApiIgnore HttpServletRequest request) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse apy(Long orderNo,@ApiIgnore HttpServletRequest request) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
@@ -186,9 +220,14 @@ public class OrderController {
     @ResponseBody
     @ApiOperation("查询支付宝状态")
     @ApiImplicitParam(value = "订单号",name = "orderNo",paramType = "query")
-    public ServerResponse<Boolean> queryOrderPayStatus(@ApiIgnore HttpSession session, Long orderNo) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
+    public ServerResponse<Boolean> queryOrderPayStatus(@ApiIgnore HttpServletRequest request, Long orderNo) {
+        String loginToken = CookieUtil.readLoginToken(request);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
         }
 
