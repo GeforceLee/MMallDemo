@@ -95,6 +95,9 @@ public class UserSessionController {
     @ResponseBody
     @ApiOperation("获取用户信息")
     public ServerResponse<User> getUserInfo(@ApiIgnore HttpServletRequest request,@ApiIgnore HttpSession session) {
+        int a = 99;
+        a = a / 0;
+        System.out.printf(""+a);
 //        String loginToken = CookieUtil.readLoginToken(request);
 //        if (StringUtils.isEmpty(loginToken)) {
 //            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
