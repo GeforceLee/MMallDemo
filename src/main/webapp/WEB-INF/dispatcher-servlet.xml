@@ -45,5 +45,19 @@
         <property name="defaultEncoding" value="UTF-8"></property>
     </bean>
 
+    <mvc:interceptors>
+        <!--定义在这里的Bean是所有的请求都拦截-->
+        <!--<bean></bean>-->
+        <mvc:interceptor>
+            <!--manage/a.do  /manage/*-->
+            <!--manage/b.do  /manage/*-->
+            <!--manage/product/a.do  /manage/**-->
+            <!--manage/order/a.do   /manage/**-->
+            <mvc:mapping path="/manage/**"/>
+            <!--不拦截的path-->
+            <!--<mvc:exclude-mapping path="/manage/user/login.do"/>-->
+            <bean class="com.mmall.controller.common.interceptor.AuthorityInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
 </beans>

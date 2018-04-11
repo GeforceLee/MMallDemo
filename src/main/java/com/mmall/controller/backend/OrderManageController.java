@@ -58,20 +58,8 @@ public class OrderManageController {
     public ServerResponse<PageInfo> orderList(@ApiIgnore HttpServletRequest request,
                                               @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                               @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            return iOrderService.manageList(pageNum,pageSize);
-        } else {
-            return ServerResponse.createByErrorMessage("没有权限");
-        }
+
+        return iOrderService.manageList(pageNum,pageSize);
     }
 
 
@@ -83,20 +71,8 @@ public class OrderManageController {
     })
     public ServerResponse<OrderVo> orderDetail(@ApiIgnore HttpServletRequest request,
                                                @RequestParam(value = "orderNo",defaultValue = "1") Long orderNo){
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            return iOrderService.manageDetail(orderNo);
-        } else {
-            return ServerResponse.createByErrorMessage("没有权限");
-        }
+
+        return iOrderService.manageDetail(orderNo);
     }
 
 
@@ -113,20 +89,8 @@ public class OrderManageController {
                                                @RequestParam(value = "orderNo",defaultValue = "1") Long orderNo,
                                                @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                                @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            return iOrderService.manageSearch(orderNo,pageNum,pageSize);
-        } else {
-            return ServerResponse.createByErrorMessage("没有权限");
-        }
+
+        return iOrderService.manageSearch(orderNo,pageNum,pageSize);
     }
 
 
@@ -139,19 +103,7 @@ public class OrderManageController {
     })
     public ServerResponse<String> orserSendGoods(@ApiIgnore HttpServletRequest request,
                                                Long orderNo){
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            return iOrderService.manageSendGood(orderNo);
-        } else {
-            return ServerResponse.createByErrorMessage("没有权限");
-        }
+
+        return iOrderService.manageSendGood(orderNo);
     }
 }

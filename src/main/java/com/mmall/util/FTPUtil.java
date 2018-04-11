@@ -90,7 +90,7 @@ public class FTPUtil {
     }
 
     private boolean uploadFile(String remotePath,List<File> fileList) throws IOException {
-        boolean uploaded = true;
+        boolean uploaded = false;
         FileInputStream fis = null;
 
         //连接FTP服务器
@@ -105,9 +105,9 @@ public class FTPUtil {
                     fis = new FileInputStream(file);
                     ftpClient.storeFile(file.getName(),fis);
                 }
+                uploaded = true;
             } catch (IOException e) {
                 log.error("上传文件异常",e);
-                uploaded = false;
             }finally {
                 fis.close();
                 ftpClient.disconnect();

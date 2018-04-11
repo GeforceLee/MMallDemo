@@ -43,10 +43,11 @@ public class FileServiceImpl implements IFileService {
             file.transferTo(targetFile);
 
             boolean result = FTPUtil.uploadFile(Lists.<File>newArrayList(targetFile));
+            targetFile.delete();
             if (!result) {
                 return null;
             }
-            targetFile.delete();
+
         } catch (IOException e) {
             log.error("上传文件异常",e);
             return null;

@@ -56,21 +56,8 @@ public class CategoryManageController {
             @ApiImplicitParam(value = "父类别id",name = "parentId",required = true,paramType = "query",defaultValue = "0")
     })
     public ServerResponse addCategory(@ApiIgnore HttpServletRequest request, String categoryName, @RequestParam(value = "parentId",defaultValue = "0") Integer parentId){
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            return iCategoryService.addCategory(categoryName,parentId);
-        }else {
-            return ServerResponse.createByErrorMessage("需要管理员权限");
-        }
 
+        return iCategoryService.addCategory(categoryName,parentId);
     }
 
     /**
@@ -88,21 +75,8 @@ public class CategoryManageController {
             @ApiImplicitParam(value = "类别名称",name = "categoryName",required = true, paramType = "query")
     })
     public ServerResponse setCategoryName(@ApiIgnore HttpServletRequest request,Integer categoryId,String categoryName) {
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            return iCategoryService.updateCategoryName(categoryId,categoryName);
-        }else {
-            return ServerResponse.createByErrorMessage("需要管理员权限");
-        }
 
+        return iCategoryService.updateCategoryName(categoryId,categoryName);
     }
 
     /**
@@ -116,22 +90,9 @@ public class CategoryManageController {
     @ApiOperation("获取平行子类别")
     @ApiImplicitParam(value = "类别id",name = "categoryId",defaultValue = "0",paramType = "query")
     public ServerResponse getChildernParallelCategory(@ApiIgnore HttpServletRequest request,@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
 
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            //查询子节点的category信息,不递归
-            return iCategoryService.getChildrenParallelCategory(categoryId);
-        }else {
-            return ServerResponse.createByErrorMessage("需要管理员权限");
-        }
+        //查询子节点的category信息,不递归
+        return iCategoryService.getChildrenParallelCategory(categoryId);
     }
 
     /**
@@ -145,22 +106,9 @@ public class CategoryManageController {
     @ApiOperation("递归获取所有子节点")
     @ApiImplicitParam(value = "类别id",name = "categoryId",defaultValue = "0",paramType = "query")
     public ServerResponse getCategoryAndDeepChildrenCategory(@ApiIgnore HttpServletRequest request,@RequestParam(value = "categoryId",defaultValue = "0") Integer categoryId){
-        String loginToken = CookieUtil.readLoginToken(request);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEES_LOGIN.getCode(),ResponseCode.NEES_LOGIN.getDesc());
-        }
 
-        if (iUserService.checkAdminRole(user).isSuccess()) {
-            //查询当前节点的category信息,递归子节点
-            return iCategoryService.selectCategoryAndChildrenById(categoryId);
-        }else {
-            return ServerResponse.createByErrorMessage("需要管理员权限");
-        }
+        //查询当前节点的category信息,递归子节点
+        return iCategoryService.selectCategoryAndChildrenById(categoryId);
     }
 
 }

@@ -24,7 +24,7 @@ public class ExceptionResolver implements HandlerExceptionResolver {
 
         modelAndView.addObject("status",ResponseCode.ERROR.getCode());
         modelAndView.addObject("msg","接口异常,详情查看日志");
-        modelAndView.addObject("data",e.toString());
+//        modelAndView.addObject("data",e.toString());
         return modelAndView;
     }
 }
