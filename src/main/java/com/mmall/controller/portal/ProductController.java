@@ -8,10 +8,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author geforce
@@ -35,6 +32,20 @@ public class ProductController {
     @ApiOperation("产品详情")
     @ApiImplicitParam(value = "产品id",name = "productId",paramType = "query")
     public ServerResponse detail(Integer productId){
+        return iProductService.getProductDetail(productId);
+    }
+
+
+    /**
+     * 产品详情
+     * @param productId
+     * @return
+     */
+    @RequestMapping(value = "/{productId}",method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation("产品详情")
+    @ApiImplicitParam(value = "产品id",name = "productId",paramType = "path")
+    public ServerResponse detailRestFulf(@PathVariable Integer productId){
         return iProductService.getProductDetail(productId);
     }
 
@@ -64,6 +75,7 @@ public class ProductController {
                                @RequestParam(value ="orderBy",defaultValue = "") String orderBy) {
         return iProductService.getProductByKeywordCategory(keyword,categoryId,pageNum,pageSize,orderBy);
     }
+
 
 
 }

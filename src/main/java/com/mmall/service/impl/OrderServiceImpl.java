@@ -30,6 +30,7 @@ import com.mmall.vo.ShippingVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -445,7 +446,33 @@ public class OrderServiceImpl implements IOrderService {
     }
 
 
-    private List<OrderVo> assembleOrderVoList(List<Order> orderList,Integer userId) {
+    @Override
+    public void closeOrder(int hour) {
+        Date closeDateTime = DateUtils.addHours(new Date(),-hour);
+
+        List<Order> orderList = orderMapper.selectOrderStatusByCreateTime(Const.OrderStatusEnum.NO_PAY.getCode(),DateTimeUtil.dateToStr(closeDateTime));
+        for (Order order : orderList) {
+            List<OrderItem> orderItemList = orderItemMapper.getByOrderNo(order.getOrderNo());
+            for (OrderItem orderItem : orderItemList) {
+                //一定要用主键where 条件,防止锁表.同时是支持Mysql的InnoDB
+                Integer sotck = productMapper.selectStockByProductId(orderItem.getProductId());
+
+                if (sotck == null) {
+                    //商品被删除了
+                    continue;
+                }
+                Product product = new Product();
+                product.setId(orderItem.getProductId());
+                //库存还原
+                product.setStock(sotck + orderItem.getQuantity());
+                productMapper.updateByPrimaryKeySelective(product);
+            }
+            orderMapper.closeOrderByOrderId(order.getId());
+            log.info("关闭订单号:{}",order.getOrderNo());
+        }
+    }
+
+    private List<OrderVo> assembleOrderVoList(List<Order> orderList, Integer userId) {
         List<OrderVo> orderVoList = Lists.newArrayList();
         for (Order order : orderList) {
             List<OrderItem> orderItemList;

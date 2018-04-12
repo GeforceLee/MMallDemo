@@ -23,4 +23,7 @@ public interface ProductMapper {
     List<Product> selectByNameAndProductId(@Param("productName")String productName,@Param("prodcutId")Integer prodcutId);
 
     List<Product> selectByNameAndCategoryIds(@Param("productName")String productName,@Param("categoryIds")List<Integer> categoryIds);
+
+    //这里一定要用Intgere 有可能差不到商品,返回为null
+    Integer selectStockByProductId(Integer id);
 }
