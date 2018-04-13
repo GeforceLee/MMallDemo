@@ -73,7 +73,7 @@ public class CloseOrderTask {
 
 
 
-//    @Scheduled(cron="0 */1 * * * ?")
+    @Scheduled(cron="0 */1 * * * ?")
     public void closeOrderTaskV3() {
         log.info("关闭订单定任务启动");
 
@@ -108,7 +108,7 @@ public class CloseOrderTask {
     }
 
 
-    @Scheduled(cron="0 */1 * * * ?")
+//    @Scheduled(cron="0 */1 * * * ?")
     public void closeOrderTaskV4() {
         log.info("关闭订单定任务启动");
 
